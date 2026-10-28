@@ -162,6 +162,4 @@ Verify the manager and leadership email settings, review `Alert_Log`, check Apps
 
 Refresh the spreadsheet and reopen it. The menu is added by the `onOpen()` function.
 
-## License
 
-Add a license file if you intend to distribute this project under a specific open-source license.
