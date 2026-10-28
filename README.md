@@ -237,6 +237,7 @@ Potential improvements include:
 **Zuha Khatoon**
 
 GitHub: [ZuhaKhatoon](https://github.com/ZuhaKhatoon)
+Gmail: zuhaa.khatoon@gmail.com
 
 ---
 
