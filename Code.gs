@@ -30,7 +30,129 @@ function onOpen() {
  * - Recurring cycle sync: every hour
  * - SLA checks: every 5 minutes
  */
+
+/**
+ * Creates the required tabs and headers if they do not already exist.
+ * Existing sheet data is preserved.
+ */
+function initializeSheets_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  const definitions = {
+    Task_Master: [
+      'Task_ID',
+      'Task_Name',
+      'Assigned_To',
+      'Employee_Email',
+      'Task_Type',
+      'Frequency_Days',
+      'First_Due_Date',
+      'Next_Due_Date',
+      'Deadline_Time',
+      'Required_Proof',
+      'Active'
+    ],
+    Employee_Report: [
+      'Cycle_ID',
+      'Task_ID',
+      'Task_Name',
+      'Assigned_To',
+      'Employee_Email',
+      'Due_Date',
+      'Due_DateTime',
+      'Status (edit dropdown)',
+      'Required_Proof',
+      'Completion_Proof (edit)',
+      'Completed_By',
+      'Completed_At',
+      'Manager_Acknowledged',
+      'Manager_Ack_At',
+      'Escalated?'
+    ],
+    Manager_Dashboard: [
+      'Metric',
+      'Value'
+    ],
+    Cycle_Log: [
+      'Cycle_ID',
+      'Task_ID',
+      'Cycle_Number',
+      'Due_Date',
+      'Due_DateTime',
+      'Employee_Email',
+      'Status',
+      'Completion_Proof',
+      'Completed_By',
+      'Completed_At',
+      'Manager_Alert_Sent_At',
+      'Manager_Acknowledged_By',
+      'Manager_Acknowledged_At',
+      'Escalated?',
+      'Leadership_Alert_Sent_At'
+    ],
+    Alert_Log: [
+      'Event_Key',
+      'Cycle_ID',
+      'Event_Type',
+      'Recipient',
+      'Timestamp',
+      'Result'
+    ],
+    Settings: [
+      'Setting',
+      'Value'
+    ]
+  };
+
+  Object.keys(definitions).forEach(name => {
+    let sheet = ss.getSheetByName(name);
+
+    if (!sheet) {
+      sheet = ss.insertSheet(name);
+    }
+
+    // Add headers only to a completely empty sheet.
+    if (sheet.getLastRow() === 0) {
+      const headers = definitions[name];
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      sheet.getRange(1, 1, 1, headers.length)
+        .setFontWeight('bold')
+        .setBackground('#17365D')
+        .setFontColor('#FFFFFF');
+      sheet.setFrozenRows(1);
+    }
+  });
+
+  const settings = ss.getSheetByName('Settings');
+  if (settings.getLastRow() === 1) {
+    settings.getRange(2, 1, 4, 2).setValues([
+      ['MANAGER_EMAIL', ''],
+      ['LEADERSHIP_EMAIL', ''],
+      ['MANAGER_ALERT_GRACE_MINUTES', 30],
+      ['LEADERSHIP_ESCALATION_HOURS', 4]
+    ]);
+  }
+
+  const dashboard = ss.getSheetByName('Manager_Dashboard');
+  if (dashboard.getLastRow() === 1) {
+    dashboard.getRange(2, 1, 5, 2).setValues([
+      ['Open Tasks', 0],
+      ['Overdue Tasks', 0],
+      ['Unacknowledged Issues', 0],
+      ['Escalated Tasks', 0],
+      ['Completed Tasks', 0]
+    ]);
+  }
+
+  Object.keys(definitions).forEach(name => {
+    const sheet = ss.getSheetByName(name);
+    sheet.autoResizeColumns(1, definitions[name].length);
+  });
+}
+
+
 function setup() {
+  initializeSheets_();
   ScriptApp.getProjectTriggers().forEach(trigger => {
     const fn = trigger.getHandlerFunction();
 
